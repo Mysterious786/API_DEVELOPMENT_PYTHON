@@ -1,10 +1,11 @@
+from .. import oauth2
 from .. import models, schemas
 from fastapi import  status, HTTPException, Depends, APIRouter, Response
 from sqlalchemy.orm import Session
 from typing import  List
 from ..database import  SessionLocal
 
-router = APIRouter()
+router = APIRouter(prefix="/posts",tags=["Posts"])
 def get_db():
     db = SessionLocal()
     try:
@@ -18,8 +19,8 @@ def get_db():
 
 
 
-@router.get("/posts",response_model=List[schemas.Post])
-def get_posts(db: Session = Depends(get_db)):
+@router.get("/",response_model=List[schemas.Post])
+def get_posts(db: Session = Depends(get_db),user_id:int=Depends(oauth2.get_current_user)):
     # cursor.execute("""SELECT * FROM post""")
     # posts = cursor.fetchall()
     #print(posts)
@@ -29,8 +30,8 @@ def get_posts(db: Session = Depends(get_db)):
 # titlw,str, content str
 # bool published post
 # create ---->  post status code 201
-@router.post("/posts", status_code=status.HTTP_201_CREATED,response_model=schemas.Post)
-def create_posts(post: schemas.PostCreate,db: Session = Depends(get_db)):
+@router.post("/", status_code=status.HTTP_201_CREATED,response_model=schemas.Post)
+def create_posts(post: schemas.PostCreate,db: Session = Depends(get_db),user_id:int=Depends(oauth2.get_current_user)):
     #cursor.execute("""INSERT INTO post (title,content,is_published) VALUES (%s,%s,%s) RETURNING * """,(post.title,post.content,post.is_published))
     #conn.commit()
     #new_post = cursor.fetchone()
@@ -48,8 +49,8 @@ def create_posts(post: schemas.PostCreate,db: Session = Depends(get_db)):
 #     return post
 
 
-@router.get("/posts/{id}") # id field represent path parameter
-def get_posts(id: int,db: Session = Depends(get_db)):
+@router.get("/{id}") # id field represent path parameter
+def get_posts(id: int,db: Session = Depends(get_db),user_id:int=Depends(oauth2.get_current_user)):
     #cursor.execute("""SELECT * from post WHERE  eid=%s """,(str(id),))
     #post = cursor.fetchone()
     #print(post)
@@ -66,8 +67,8 @@ def get_posts(id: int,db: Session = Depends(get_db)):
 #             return i
     
         
-@router.delete("/posts/{id}",status_code=status.HTTP_204_NO_CONTENT)
-def delete_post(id:int,db: Session = Depends(get_db)):
+@router.delete("/{id}",status_code=status.HTTP_204_NO_CONTENT)
+def delete_post(id:int,db: Session = Depends(get_db),user_id:int=Depends(oauth2.get_current_user)):
     #find the index in the array
     #my_post.pop(ind)
    # cursor.execute("""DELETE from post where eid=%s returning *""",(str(id),))
@@ -81,8 +82,8 @@ def delete_post(id:int,db: Session = Depends(get_db)):
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.put("/posts/{id}")
-def update_post(id:int,updated_post: schemas.PostCreate,db: Session = Depends(get_db)):
+@router.put("/{id}")
+def update_post(id:int,updated_post: schemas.PostCreate,db: Session = Depends(get_db),user_id:int=Depends(oauth2.get_current_user)):
     #print(post)
     #cursor.execute("""UPDATE post SET title = %s, content=%s, is_published=%s WHERE eid = %s returning *""",(post.title,post.content,post.is_published,str(id)))
     #updated_post = cursor.fetchone()

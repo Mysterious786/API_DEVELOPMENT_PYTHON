@@ -1,14 +1,12 @@
-from enum import auto
-from typing import Optional, List
-from fastapi import FastAPI, Response, status, HTTPException, Depends
-from .routes import post,user
-from random import randrange
+
+from typing import  List
+from fastapi import FastAPI
+from .routes import post,user,auth
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import time
-from sqlalchemy.orm import Session
-from . import models, schemas, utils
-from .database import engine, SessionLocal
+from . import models
+from .database import engine
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -53,6 +51,7 @@ while True:
 
 app.include_router(post.router)
 app.include_router(user.router)
+app.include_router(auth.router)
 
 @app.get("/")
 async def root():

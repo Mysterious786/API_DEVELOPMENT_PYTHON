@@ -3,3 +3,5 @@
 #postgress deriver psycopg
 #Object Relational Mapper
 #sqlalchemy
+#JWT Token ---> header payload,signature
+#pythn-jose sign in and verify jwt tokens
