@@ -1,5 +1,5 @@
 from .database import Base
-from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy import TIMESTAMP, Column, Integer, String, Boolean, text
 class Post(Base):
     __tablename__ = "posts"
     id = Column(Integer, primary_key=True, nullable=False)
@@ -7,3 +7,11 @@ class Post(Base):
     content = Column(String, nullable=False)
     is_published = Column(Boolean, default=True)
     
+class User(Base):
+    __tablename__ = "users"
+    id =  Column(Integer, primary_key=True,nullable=False)
+    email =  Column(String,nullable=False,unique=True)
+    password = Column(String,nullable=False)
+    created_At = Column(TIMESTAMP(timezone=True),
+    nullable=False,server_default=text('now()'))
+
