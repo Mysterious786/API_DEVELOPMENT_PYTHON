@@ -10,9 +10,20 @@ class PostBase(BaseModel):
 class PostCreate(PostBase):
     pass 
 
+class UserOut(BaseModel):
+    id: int
+    email: EmailStr
+    #created_At: datetime
+    
+    class Config:
+        from_orm = True
+
+
 class Post(PostBase):
     id: int
-    #created_at: datetime
+    created_At: datetime
+    owner_id: int
+    owner: UserOut
 
     class Config:
         from_orm = True

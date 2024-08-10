@@ -1,12 +1,17 @@
 from .database import Base
-from sqlalchemy import TIMESTAMP, Column, Integer, String, Boolean, text
+from sqlalchemy import TIMESTAMP, Column, ForeignKey, Integer, String, Boolean, text
+from sqlalchemy.orm import relationship
 class Post(Base):
     __tablename__ = "posts"
     id = Column(Integer, primary_key=True, nullable=False)
     title = Column(String, nullable=False)
     content = Column(String, nullable=False)
     is_published = Column(Boolean, default=True)
-    
+    created_At = Column(TIMESTAMP(timezone=True),
+    nullable=False,server_default=text('now()'))
+    owner_id = Column(Integer,ForeignKey("users.id",ondelete="CASCADE"),nullable=False)
+    owner = relationship("User") #fetching user based on user id
+
 class User(Base):
     __tablename__ = "users"
     id =  Column(Integer, primary_key=True,nullable=False)
