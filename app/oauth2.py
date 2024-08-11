@@ -7,7 +7,7 @@ from . import schemas, database, models
 from .config import settings
 # Secret key
 # Algorithm
-# Expiration time
+# Expiration time 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='login')
 SECRET_KEY = settings.secret_key
 ALGORITHM = settings.algorithm
