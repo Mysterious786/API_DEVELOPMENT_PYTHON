@@ -1,3 +1,4 @@
+from sqlalchemy import func
 from .. import oauth2
 from .. import models, schemas
 from fastapi import  status, HTTPException, Depends, APIRouter, Response
@@ -19,14 +20,32 @@ def get_db():
 
 
 
-@router.get("/",response_model=List[schemas.Post])
-def get_posts(db: Session = Depends(get_db),current_user:int=Depends(oauth2.get_current_user),limit:int = 10,skip:int = 0,search:Optional[str]=""):
-    # cursor.execute("""SELECT * FROM post""")
-    # posts = cursor.fetchall()
-    #print(posts)
-    # %20 space
-    print(limit)
-    posts = db.query(models.Post).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all() #pagination
+@router.get("/",response_model=List[schemas.PostOut])
+def get_posts(
+    db: Session = Depends(get_db), 
+    current_user: int = Depends(oauth2.get_current_user), 
+    limit: int = 10, 
+    skip: int = 0, 
+    search: Optional[str] = ""
+):
+    # Query posts with pagination and optional search filter
+    # posts = db.query(models.Post).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
+
+    # Query for posts with their vote counts
+    posts = db.query(
+        models.Post, 
+        func.count(models.Vote.post_id).label("votes")
+    ).join(
+        models.Vote, models.Vote.post_id == models.Post.id, isouter=True
+    ).group_by(models.Post.id).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
+
+    # # Serialize the results into a format that can be returned by FastAPI
+    # serialized_results = []
+    # for post, vote_count in results:
+    #     post_dict = post.__dict__.copy()  # Convert Post object to dictionary
+    #     post_dict['votes'] = vote_count   # Add the vote count to the dictionary
+    #     serialized_results.append(post_dict)
+
     return posts
 
 # titlw,str, content str
@@ -52,13 +71,18 @@ def create_posts(post: schemas.PostCreate,db: Session = Depends(get_db),current_
 #     return post
 
 
-@router.get("/{id}",response_model=schemas.Post) # id field represent path parameter
+@router.get("/{id}",response_model=schemas.PostOut) # id field represent path parameter
 def get_posts(id: int,db: Session = Depends(get_db),current_user:int=Depends(oauth2.get_current_user)):
     #cursor.execute("""SELECT * from post WHERE  eid=%s """,(str(id),))
     #post = cursor.fetchone()
     #print(post)
-    post = db.query(models.Post).filter(models.Post.id == id).first()
-    print(post)
+    post = db.query(
+        models.Post, 
+        func.count(models.Vote.post_id).label("votes")
+    ).join(
+        models.Vote, models.Vote.post_id == models.Post.id, isouter=True
+    ).group_by(models.Post.id).filter(models.Post.id == id).first()
+    #print(post)
     if not post:
         # response.status_code = status.HTTP_404_NOT_FOUND
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"post with id: {id} was not found")
